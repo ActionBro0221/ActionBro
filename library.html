@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>教學圖書室 | 影視元宇宙</title>
+    <style>
+        body { 
+            background: #0a0a0a; color: #fff; font-family: sans-serif; text-align: center; padding: 60px 20px;
+            background-image: radial-gradient(circle at 50% 0%, #1a1a2e 0%, #0a0a0a 70%);
+        }
+        .nav-back { margin-bottom: 40px; display: block; color: #007bff; text-decoration: none; font-weight: bold; }
+        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; }
+        .card { 
+            background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 20px; 
+            padding: 30px; width: 280px; transition: 0.3s;
+        }
+        .card:hover { transform: translateY(-10px); border-color: #007bff; }
+        .btn { 
+            display: block; text-decoration: none; padding: 12px; margin-top: 10px;
+            border-radius: 50px; font-weight: bold; font-size: 14px;
+        }
+        .download { background: #fff; color: #000; }
+        .tutorial { border: 1px solid #fff; color: #fff; }
+    </style>
+</head>
+<body>
+    <a href="main.html" class="nav-back">← 返回主選單</a>
+    <h1>剪輯圖書館</h1>
+    <p>提供最新軟體下載連結與 ActionBro 精選教學</p>
+
+    <div class="container">
+        <div class="card">
+            <h2>Adobe PR</h2>
+            <p>業界標準專業剪輯工具。</p>
+            <a href="https://www.adobe.com/tw/products/premiere.html" target="_blank" class="btn download">官方下載</a>
+            <a href="tutorial.html" class="btn tutorial">查看教學</a>
+        </div>
+        <div class="card">
+            <h2>達芬奇 DaVinci</h2>
+            <p>最強調色與特效系統。</p>
+            <a href="https://www.blackmagicdesign.com/tw/products/davinciresolve" target="_blank" class="btn download">官方下載</a>
+            <a href="#" class="btn tutorial">調色教學</a>
+        </div>
+        <div class="card">
+            <h2>剪映 CapCut</h2>
+            <p>短影音 AI 快速出片神器。</p>
+            <a href="https://www.capcut.com/" target="_blank" class="btn download">官方下載</a>
+            <a href="#" class="btn tutorial">快速上手</a>
+        </div>
+    </div>
+</body>
+</html>

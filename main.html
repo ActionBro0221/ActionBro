@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ActionBro | 影視元宇宙</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Oswald:wght@300;700&display=swap" rel="stylesheet">
+    <style>
+        body, html { margin: 0; padding: 0; background: #000; color: #fff; scroll-behavior: smooth; font-family: 'Oswald', sans-serif; }
+        
+        /* --- 抽屜式滑出選單設定 --- */
+        /* --- 抽屜式滑出選單設定 (升級：若有若無的絲綢線條) --- */
+        .drawer-menu {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 10px; 
+            height: 100vh;
+            overflow: hidden; 
+            transition: width 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            border-right: 1px solid rgba(255,255,255,0.1);
+
+            /* 👇 替換這段背景材質設定 👇 */
+            background: 
+                /* 第一層：極淡、不密集的絲線織紋 (將間距拉大到 12px) */
+                repeating-linear-gradient(
+                    160deg, /* 稍微調整角度，讓它偏向橫向 */
+                    rgba(255, 255, 255, 0.015) 0px, /* 降低透明度到 0.015 */
+                    rgba(255, 255, 255, 0.015) 1px,
+                    transparent 1px,
+                    transparent 12px /* 拉大重複間距 */
+                ),
+                /* 第二層：絲綢的寬幅反光澤 (維持原本的流動感) */
+                linear-gradient(
+                    120deg, 
+                    rgba(15, 15, 15, 0.98) 0%, 
+                    rgba(45, 45, 45, 0.85) 25%, 
+                    rgba(10, 10, 10, 0.95) 50%, 
+                    rgba(50, 50, 50, 0.8) 75%, 
+                    rgba(5, 5, 5, 0.98) 100%
+                );
+            background-size: auto, 200% 200%;
+            animation: silkShimmer 6s ease-in-out infinite alternate;
+            box-shadow: inset -5px 0 20px rgba(0,0,0,0.8);
+        }
+
+        /* 滑鼠移過去時展開寬度 */
+        .drawer-menu:hover {
+            width: 280px;
+        }
+
+        .menu-hint {
+            position: absolute;
+            right: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.3);
+            transition: 0.3s;
+        }
+        
+        .drawer-menu:hover .menu-hint {
+            opacity: 0;
+        }
+
+        .drawer-menu a {
+            color: #eeeeee;
+            text-decoration: none;
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.8rem;
+            letter-spacing: 3px;
+            margin: 25px auto;
+            transition: all 0.4s ease;
+            transform: translateX(-20px);
+            opacity: 0; 
+            text-align: center;
+            width: fit-content;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .drawer-menu:hover a {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .drawer-menu:hover a:nth-child(2) { transition-delay: 0.1s; }
+        .drawer-menu:hover a:nth-child(3) { transition-delay: 0.2s; }
+        .drawer-menu:hover a:nth-child(4) { transition-delay: 0.3s; }
+
+        .drawer-menu a:hover {
+    color: #ffffff; /* 變全白 */
+    /* 加強發光感 */
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 5px rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+
+        .sub-text {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            color: #888;
+        }
+
+        section {
+            height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            position: relative; overflow: hidden;
+            border-bottom: 1px solid #222;
+        }
+
+        #hero {
+            background: linear-gradient(rgba(0,0,0,0.5), #000), 
+                        url('https://images.unsplash.com/photo-1492691523569-fc010075d362?auto=format&fit=crop&q=80&w=2070');
+            background-size: cover; background-position: center;
+        }
+        .logo { font-family: 'Noto Serif TC', serif; font-size: 5rem; letter-spacing: 15px; margin: 0; text-shadow: 0 0 30px #000; }
+
+        #library { background: #050505; }
+        .grid { display: flex; gap: 30px; }
+        .item { 
+            width: 250px; height: 350px; background: #111; border: 1px solid #333;
+            display: flex; flex-direction: column; justify-content: flex-end; padding: 20px;
+            transition: 0.5s; cursor: pointer;
+        }
+        .item:hover { transform: scale(1.05); border-color: #fff; background: #222; }
+
+        #services { background: #000; }
+        .service-title { font-size: 3rem; color: #aaa; margin-bottom: 20px; }
+        
+        .enter-link {
+            margin-top: 50px; padding: 15px 40px; border: 1px solid #fff;
+            text-decoration: none; color: #fff; transition: 0.3s;
+        }
+        .enter-link:hover { background: #fff; color: #000; }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1s ease-out;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .typing-container {
+            width: fit-content;
+            margin: 0 auto;
+        }
+
+        .typing-effect {
+            font-size: 1.2rem;
+            letter-spacing: 5px;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 3px solid #fff;
+            display: inline-block;
+            animation: 
+                typing 2.5s steps(30, end), 
+                blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #fff; }
+        }
+
+        @keyframes silkShimmer {
+            0% { background-position: 0% 0%, 0% 50%; }
+            100% { background-position: 0% 0%, 100% 50%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="drawer-menu">
+        <div class="menu-hint"></div> 
+        <a href="#hero">HOME<br><span class="sub-text">首頁</span></a>
+        <a href="#library">LIBRARY<br><span class="sub-text">剪輯圖書室</span></a>
+        <a href="#services">SERVICES<br><span class="sub-text">客製化服務</span></a>
+    </div>
+
+    <section id="hero">
+        <div class="typing-container">
+            <p class="typing-effect">ACTIONBRO PRESENTS</p>
+        </div>
+        <h1 class="logo reveal">影視元宇宙</h1>
+        <p style="margin-top: 20px; color: #888;" class="reveal">SCROLL TO ENTER</p>
+    </section>
+
+    <section id="library">
+        <h2 class="reveal" style="font-size: 3rem; margin-bottom: 50px;">剪輯圖書館</h2>
+        <div class="grid reveal">
+            <div class="item" onclick="location.href='library.html'">
+                <h3>PR 專業教學</h3>
+                <p>VIEW LIBRARY</p>
+            </div>
+            <div class="item" onclick="location.href='library.html'">
+                <h3>達芬奇調色</h3>
+                <p>VIEW LIBRARY</p>
+            </div>
+            <div class="item" onclick="location.href='library.html'">
+                <h3>剪映快剪</h3>
+                <p>VIEW LIBRARY</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="services">
+        <p style="color: #666;" class="reveal">CUSTOM PRODUCTION</p>
+        <h2 class="service-title reveal">客製化影音工作室</h2>
+        <p class="reveal" style="max-width: 600px; text-align: center; color: #888;">
+            無論是長影音的深度敘事，還是短影音的流量爆發，我們為您提供最專業的視覺方案。
+        </p>
+        <a href="service.html" class="enter-link reveal">進入</a>
+    </section>
+
+    <script>
+    function reveal() {
+        var reveals = document.querySelectorAll(".reveal");
+        for (var i = 0; i < reveals.length; i++) {
+            var windowHeight = window.innerHeight;
+            var elementTop = reveals[i].getBoundingClientRect().top;
+            var elementBottom = reveals[i].getBoundingClientRect().bottom;
+            var elementVisible = 150; 
+
+            if (elementTop < windowHeight - elementVisible) {
+                reveals[i].classList.add("active");
+            } 
+            
+            if (elementBottom < 0 || elementTop > windowHeight) {
+                reveals[i].classList.remove("active");
+            }
+        }
+    }
+
+    window.addEventListener("scroll", reveal);
+    reveal();
+    </script>
+
+</body>
+</html>
