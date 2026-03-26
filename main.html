@@ -7,415 +7,161 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Oswald:wght@300;700&display=swap" rel="stylesheet">
     <style>
         /* ============================================
-           基礎樣式 & 重置
+           1. 入口遮罩 (Splash Screen) & UI 設計
+           ============================================ */
+        #entry-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #0a0a1a 0%, #000 100%);
+            z-index: 9999; display: flex; justify-content: center; align-items: center;
+            transition: opacity 1.2s ease, visibility 1.2s;
+            overflow: hidden;
+        }
+
+        /* 背景影片設定 (已開啟) */
+        .bg-video {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: -1; opacity: 0.5;
+        }
+
+        .entry-content {
+            display: flex; flex-direction: column; align-items: center; gap: 35px;
+            text-align: center; z-index: 10;
+        }
+
+        /* 大頭照：圓形、發光、漂浮感 */
+        .profile-img {
+            width: 160px; height: 160px; border-radius: 50%;
+            object-fit: cover; border: 3px solid #007bff;
+            box-shadow: 0 0 30px rgba(0, 123, 255, 0.6);
+            animation: imgFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes imgFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+        }
+
+        .entry-btn {
+            padding: 18px 50px; font-family: 'Noto Serif TC', serif; font-size: 1.3rem;
+            color: #fff; background: rgba(0,0,0,0.5); border: 2px solid #007bff;
+            border-radius: 50px; cursor: pointer; letter-spacing: 8px;
+            box-shadow: 0 0 20px rgba(0, 123, 255, 0.4); transition: 0.4s;
+            text-transform: uppercase;
+        }
+
+        .entry-btn:hover {
+            transform: scale(1.1); background: #007bff;
+            box-shadow: 0 0 40px rgba(0, 123, 255, 0.9);
+        }
+
+        #entry-overlay.fade-out { opacity: 0; visibility: hidden; }
+
+        /* ============================================
+           2. 核心樣式 (ActionBro 影視風格)
            ============================================ */
         body, html { 
-            margin: 0; 
-            padding: 0; 
-            background: #000; 
-            color: #fff; 
-            scroll-behavior: smooth; 
-            font-family: 'Oswald', sans-serif; 
-            overflow-x: hidden; 
-            width: 100%;
+            margin: 0; padding: 0; background: #000; color: #fff; 
+            scroll-behavior: smooth; font-family: 'Oswald', sans-serif; 
+            overflow-x: hidden; width: 100%;
         }
-        
-        /* ============================================
-           1. 側邊選單：絲綢質感 + 手機版優化
-           ============================================ */
+
+        /* 絲綢質感側邊選單 */
         .drawer-menu {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 0px;
-            height: 100vh;
-            overflow: hidden;
-            transition: width 0.5s ease-out;
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            position: fixed; left: 0; top: 0; width: 0px; height: 100vh;
+            overflow: hidden; transition: width 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: 2000; display: flex; flex-direction: column; justify-content: center;
             backdrop-filter: blur(15px);
-            background: repeating-linear-gradient(
-                160deg, 
-                rgba(255, 255, 255, 0.01) 0px, 
-                rgba(255, 255, 255, 0.01) 1px, 
-                transparent 1px, 
-                transparent 12px
-            ), linear-gradient(
-                120deg, 
-                rgba(10, 10, 10, 0.98) 0%, 
-                rgba(30, 30, 30, 0.9) 50%, 
-                rgba(5, 5, 5, 0.98) 100%
-            );
+            background: repeating-linear-gradient(160deg, rgba(255, 255, 255, 0.01) 0px, rgba(255, 255, 255, 0.01) 1px, transparent 1px, transparent 12px),
+                        linear-gradient(120deg, rgba(15, 15, 15, 0.98), rgba(5, 5, 5, 0.98));
             box-shadow: inset -5px 0 20px rgba(0,0,0,0.8);
-            will-change: width;
         }
 
-        /* 電腦版：維持 10px 絲綢邊緣懸浮 */
         @media (min-width: 769px) {
-            .drawer-menu { 
-                width: 10px; 
-            }
-            .drawer-menu:hover { 
-                width: 300px; 
-            }
-            .drawer-menu:hover a { 
-                transform: translateX(0); 
-                opacity: 1; 
-            }
+            .drawer-menu { width: 10px; }
+            .drawer-menu:hover, .drawer-menu.active { width: 300px; }
+            .drawer-menu:hover a, .drawer-menu.active a { transform: translateX(0); opacity: 1; }
         }
 
-        /* 手機版：點擊後展開的寬度 */
-        .drawer-menu.active { 
-            width: 80vw !important; 
-            border-right: 1px solid rgba(255,255,255,0.2); 
-        }
-        .drawer-menu.active a { 
-            transform: translateX(0); 
-            opacity: 1; 
-        }
+        .drawer-menu.active { width: 80vw !important; }
+        .drawer-menu.active a { transform: translateX(0); opacity: 1; }
 
         .drawer-menu a {
-            color: #eee;
-            text-decoration: none;
-            font-family: 'Noto Serif TC', serif;
-            font-size: 1.8rem;
-            letter-spacing: 3px;
-            margin: 25px auto;
-            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
-            transform: translateX(-30px);
-            opacity: 0;
-            text-align: center;
-            width: 100%;
-            display: block;
-            will-change: transform, opacity;
+            color: #eee; text-decoration: none; font-family: 'Noto Serif TC', serif;
+            font-size: 1.8rem; letter-spacing: 3px; margin: 25px auto;
+            transition: 0.4s; transform: translateX(-30px); opacity: 0; text-align: center; display: block;
         }
+        .sub-text { font-family: 'Microsoft JhengHei', sans-serif; font-size: 0.85rem; color: #888; display: block; margin-top: 5px;}
 
-        .drawer-menu a:hover { 
-            color: #fff;
-            text-shadow: 0 0 15px #fff;
-            transform: scale(1.1);
-        }
-
-        .sub-text { 
-            font-family: 'Microsoft JhengHei', sans-serif;
-            font-size: 0.85rem;
-            color: #888;
-            display: block;
-            margin-top: 5px;
-        }
-
-        /* ============================================
-           2. 手機版專用漢堡按鈕
-           ============================================ */
+        /* 漢堡按鈕 */
         .menu-btn {
-            position: fixed;
-            top: 25px;
-            left: 20px;
-            z-index: 3000;
-            width: 30px;
-            height: 20px;
-            cursor: pointer;
-            display: none;
-            flex-direction: column;
-            justify-content: space-between;
+            position: fixed; top: 25px; left: 25px; z-index: 3000;
+            width: 32px; height: 22px; cursor: pointer; display: flex;
+            flex-direction: column; justify-content: space-between;
         }
-
-        .menu-btn div {
-            width: 100%;
-            height: 2px;
-            background: #fff;
-            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-            will-change: transform, opacity;
-        }
+        .menu-btn div { width: 100%; height: 2px; background: #fff; transition: 0.3s; }
 
         /* ============================================
-           3. 圖書館卡片美化 (加入海報質感)
+           3. 內容區塊與卡片
            ============================================ */
-        .grid {
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-            justify-content: center;
-            width: 100%;
-            max-width: 1200px;
-        }
-
-        .item {
-            position: relative;
-            width: 280px;
-            height: 400px;
-            background: #111;
-            border: 1px solid rgba(255,255,255,0.1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 30px 20px;
-            transition: transform 0.5s ease-out, border-color 0.5s ease-out, box-shadow 0.5s ease-out;
-            cursor: pointer;
-            box-sizing: border-box;
-            will-change: transform;
-        }
-
-        .item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.9) 100%);
-            z-index: 1;
-            transition: background 0.5s ease-out;
-            will-change: background;
-        }
-
-        .item:hover {
-            transform: translateY(-10px);
-            border-color: #fff;
-            box-shadow: 0 10px 30px rgba(255,255,255,0.1);
-        }
-
-        .item:hover::before {
-            background: linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.7) 100%);
-        }
-
-        /* 卡片背景圖範例 */
-        .item-pr {
-            background: url('https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=600') center/cover;
-        }
-
-        .item-davinci {
-            background: url('https://images.unsplash.com/photo-1535016120720-40c646bebbbb?q=80&w=600') center/cover;
-        }
-
-        .item-capcut {
-            background: url('https://images.unsplash.com/photo-1536240478700-b869070f9279?q=80&w=600') center/cover;
-        }
-
-        .item h3 {
-            position: relative;
-            z-index: 2;
-            margin: 0;
-            font-size: 1.5rem;
-            letter-spacing: 2px;
-        }
-
-        .item p {
-            position: relative;
-            z-index: 2;
-            margin: 5px 0 0;
-            color: #aaa;
-            font-size: 0.8rem;
-            letter-spacing: 3px;
-        }
-
-        /* ============================================
-           4. 內容區塊與打字機
-           ============================================ */
-        section {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 60px 20px;
-            box-sizing: border-box;
-        }
-
-        #hero {
-            background: linear-gradient(rgba(0,0,0,0.6), #000), url('https://images.unsplash.com/photo-1492691523569-fc010075d362?q=80&w=2070') center/cover;
-        }
-
-        .logo {
-            font-family: 'Noto Serif TC', serif;
-            font-size: 5rem;
-            letter-spacing: 15px;
-            margin: 20px 0;
-            text-align: center;
-        }
+        section { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px 20px; box-sizing: border-box; }
         
-        .typing-effect {
-            font-size: 1.2rem;
-            letter-spacing: 5px;
-            color: #fff;
-            border-right: 3px solid #fff;
-            white-space: nowrap;
-            overflow: hidden;
-            width: fit-content;
-            animation: typing 2.5s steps(30, end);
-            will-change: width;
+        #hero { background: linear-gradient(rgba(0,0,0,0.6), #000), url('https://images.unsplash.com/photo-1492691523569-fc010075d362?q=80&w=2070') center/cover; }
+        .logo { font-family: 'Noto Serif TC', serif; font-size: 5rem; letter-spacing: 15px; margin: 20px 0; text-align: center; }
+        
+        .typing-effect { font-size: 1.2rem; letter-spacing: 5px; color: #fff; border-right: 3px solid #fff; white-space: nowrap; overflow: hidden; animation: typing 2.5s steps(30, end), blink-caret 0.75s step-end infinite; }
+        
+        @keyframes typing { from { width: 0; } to { width: 100%; } }
+        @keyframes blink-caret { from, to { border-color: transparent; } 50% { border-color: #fff; } }
+
+        .grid { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
+        .item { 
+            position: relative; width: 280px; height: 400px; background: #111; 
+            border: 1px solid rgba(255,255,255,0.1); overflow: hidden;
+            display: flex; flex-direction: column; justify-content: flex-end; padding: 30px 20px;
+            transition: 0.5s; cursor: pointer; box-sizing: border-box;
         }
+        .item-pr { background: url('https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=600') center/cover; }
+        .item-davinci { background: url('https://images.unsplash.com/photo-1535016120720-40c646bebbbb?q=80&w=600') center/cover; }
+        .item-capcut { background: url('https://images.unsplash.com/photo-1536240478700-b869070f9279?q=80&w=600') center/cover; }
+        
+        .item::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.9) 100%); z-index: 1; }
+        .item h3, .item p { position: relative; z-index: 2; margin: 5px 0; }
 
-        .enter-link {
-            margin-top: 50px;
-            padding: 15px 40px;
-            border: 1px solid #fff;
-            text-decoration: none;
-            color: #fff;
-            transition: background 0.3s ease-out, color 0.3s ease-out;
-            letter-spacing: 5px;
-            will-change: background, color;
-        }
+        .reveal { opacity: 0; transform: translateY(30px); transition: 1s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
 
-        .enter-link:hover {
-            background: #fff;
-            color: #000;
-        }
-
-        /* ============================================
-           5. 動畫定義
-           ============================================ */
-        @keyframes typing {
-            from { width: 0; }
-            to { width: 100%; }
-        }
-
-        @keyframes blink-caret {
-            from, to { border-color: transparent; }
-            50% { border-color: #fff; }
-        }
-
-        /* 優化的打字機光標閃爍 */
-        .typing-effect {
-            animation: typing 2.5s steps(30, end);
-            border-right: 3px solid #fff;
-        }
-
-        /* ============================================
-           6. 顯示和隱藏動畫 (Scroll Reveal)
-           ============================================ */
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 1s ease-out, transform 1s ease-out;
-            will-change: opacity, transform;
-        }
-
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ============================================
-           7. 無障礙支援：prefers-reduced-motion
-           ============================================ */
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-
-            .drawer-menu {
-                transition: none;
-            }
-
-            .drawer-menu a {
-                transition: none;
-            }
-
-            .item {
-                transition: none;
-            }
-
-            .item::before {
-                transition: none;
-            }
-
-            .typing-effect {
-                animation: none;
-                border-right: 3px solid #fff;
-                width: auto;
-                overflow: visible;
-            }
-
-            .reveal {
-                transition: none;
-                opacity: 1;
-                transform: translateY(0);
-            }
-
-            .enter-link {
-                transition: none;
-            }
-        }
-
-        /* ============================================
-           8. 響應式設計：手機版優化
-           ============================================ */
+        /* RWD 微調 */
         @media (max-width: 768px) {
-            .menu-btn {
-                display: flex;
-            }
-
-            .logo {
-                font-size: 2.5rem !important;
-                letter-spacing: 5px !important;
-                line-height: 1.4;
-            }
-
-            .typing-effect {
-                font-size: 0.9rem !important;
-                letter-spacing: 2px !important;
-            }
-            
-            #library h2 {
-                font-size: 2.2rem !important;
-            }
-
-            .grid {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .item {
-                width: 90% !important;
-                height: 200px !important;
-            }
-            
-            .service-title {
-                font-size: 1.8rem !important;
-                text-align: center;
-            }
-
-            #services p {
-                font-size: 0.9rem;
-                text-align: center;
-            }
+            .logo { font-size: 2.5rem !important; letter-spacing: 5px !important; }
+            .item { width: 95% !important; height: 220px !important; }
+            .profile-img { width: 130px; height: 130px; }
+            .entry-btn { font-size: 1rem; padding: 15px 35px; letter-spacing: 5px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 漢堡按鈕 -->
-    <div class="menu-btn" onclick="toggleMenu()" aria-label="Toggle navigation menu">
-        <div></div>
-        <div></div>
-        <div></div>
+    <div id="entry-overlay">
+        <video autoplay muted loop playsinline class="bg-video">
+            <source src="bg.mp4" type="video/mp4">
+        </video>
+        
+        <div class="entry-content">
+            <img src="my-photo.jpg" alt="ActionBro" class="profile-img">
+            <button class="entry-btn" onclick="startExperience()">進入影視元宇宙</button>
+        </div>
     </div>
 
-    <!-- 側邊導航選單 -->
-    <div class="drawer-menu" id="drawer" role="navigation">
-        <a href="#hero" onclick="closeMenu()">
-            HOME<br>
-            <span class="sub-text">首頁</span>
-        </a>
-        <a href="#library" onclick="closeMenu()">
-            LIBRARY<br>
-            <span class="sub-text">剪輯圖書室</span>
-        </a>
-        <a href="#services" onclick="closeMenu()">
-            SERVICES<br>
-            <span class="sub-text">客製化服務</span>
-        </a>
+    <div class="menu-btn" onclick="toggleMenu()">
+        <div></div><div></div><div></div>
     </div>
 
-    <!-- Hero 區塊 -->
+    <div class="drawer-menu" id="drawer">
+        <a href="#hero" onclick="closeMenu()">HOME<br><span class="sub-text">首頁</span></a>
+        <a href="#library" onclick="closeMenu()">LIBRARY<br><span class="sub-text">剪輯圖書室</span></a>
+        <a href="#services" onclick="closeMenu()">SERVICES<br><span class="sub-text">客製化服務</span></a>
+    </div>
+
     <section id="hero">
         <div class="typing-container">
             <p class="typing-effect">ACTIONBRO PRESENTS</p>
@@ -424,94 +170,52 @@
         <p style="margin-top: 20px; color: #888;" class="reveal">SCROLL TO ENTER</p>
     </section>
 
-    <!-- 圖書館區塊 -->
     <section id="library">
         <h2 class="reveal" style="font-size: 3rem; margin-bottom: 50px;">剪輯圖書館</h2>
         <div class="grid reveal">
-            <div class="item item-pr" onclick="location.href='library.html'" role="button" tabindex="0" onkeypress="if(event.key==='Enter') location.href='library.html'">
+            <div class="item item-pr" onclick="location.href='library.html'">
                 <h3>PR 專業教學</h3>
                 <p>VIEW LIBRARY</p>
             </div>
-            <div class="item item-davinci" onclick="location.href='library.html'" role="button" tabindex="0" onkeypress="if(event.key==='Enter') location.href='library.html'">
+            <div class="item item-davinci" onclick="location.href='library.html'">
                 <h3>達芬奇調色</h3>
                 <p>VIEW LIBRARY</p>
             </div>
-            <div class="item item-capcut" onclick="location.href='library.html'" role="button" tabindex="0" onkeypress="if(event.key==='Enter') location.href='library.html'">
+            <div class="item item-capcut" onclick="location.href='library.html'">
                 <h3>剪映快剪</h3>
                 <p>VIEW LIBRARY</p>
             </div>
         </div>
     </section>
 
-    <!-- 服務區塊 -->
     <section id="services">
-        <p style="color: #666;" class="reveal">CUSTOM PRODUCTION</p>
-        <h2 class="service-title reveal">客製化影音工作室</h2>
-        <p class="reveal" style="max-width: 600px; text-align: center; color: #888;">
-            無論是長影音的深度敘事，還是短影音的流量爆發，我們為您提供最專業的視覺方案。
+        <h2 class="reveal" style="font-size: 3rem; margin-bottom: 20px;">客製化影音工作室</h2>
+        <p class="reveal" style="max-width: 600px; text-align: center; color: #888; margin-bottom: 40px;">
+            每一幀畫面都是故事的延伸。我們提供從腳本到成片的完整影音方案。
         </p>
-        <a href="service.html" class="enter-link reveal">進入</a>
+        <a href="service.html" class="reveal" style="padding: 15px 40px; border: 1px solid #fff; text-decoration: none; color: #fff;">進入查看價格表</a>
     </section>
 
     <script>
-    // ============================================
-    // 1. 選單邏輯：解決手機版鎖死
-    // ============================================
-    function toggleMenu() {
-        document.getElementById('drawer').classList.toggle('active');
+    // 進入功能
+    function startExperience() {
+        document.getElementById('entry-overlay').classList.add('fade-out');
     }
 
-    function closeMenu() {
-        document.getElementById('drawer').classList.remove('active');
-    }
+    // 選單開關
+    function toggleMenu() { document.getElementById('drawer').classList.toggle('active'); }
+    function closeMenu() { document.getElementById('drawer').classList.remove('active'); }
 
-    // ============================================
-    // 2. 高效的 Scroll Reveal 使用 Intersection Observer
-    // ============================================
-    // 檢查瀏覽器是否支援 Intersection Observer
-    if ('IntersectionObserver' in window) {
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
-        };
-
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                    // 觀察一次後移除，避免重複執行
-                    revealObserver.unobserve(entry.target);
-                }
-            });
-        }, observerOptions);
-
-        // 觀察所有需要顯示的元素
-        document.querySelectorAll('.reveal').forEach(el => {
-            revealObserver.observe(el);
+    // 捲動偵測
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+            }
         });
-    } else {
-        // Fallback for older browsers
-        function revealFallback() {
-            const reveals = document.querySelectorAll('.reveal');
-            reveals.forEach(reveal => {
-                const windowHeight = window.innerHeight;
-                const elementTop = reveal.getBoundingClientRect().top;
-                if (elementTop < windowHeight - 100) {
-                    reveal.classList.add('active');
-                }
-            });
-        }
-        window.addEventListener('scroll', revealFallback);
-        revealFallback(); // 頁面載入時執行一次
-    }
+    }, { threshold: 0.1 });
 
-    // ============================================
-    // 3. 檢查系統是否啟用深色模式並調整
-    // ============================================
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        // 深色模式已被系統啟用
-        document.documentElement.style.colorScheme = 'dark';
-    }
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     </script>
 
 </body>
