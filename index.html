@@ -7,178 +7,150 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Oswald:wght@300;700&display=swap" rel="stylesheet">
     <style>
         /* ============================================
-           1. 入口遮罩 (Splash Screen) - 解決你的 UI 需求
+           1. 基礎重置與背景
            ============================================ */
+        body, html { 
+            margin: 0; padding: 0; background: #000; color: #fff; 
+            overflow: hidden; width: 100%; height: 100%;
+            font-family: 'Oswald', sans-serif;
+        }
+
         #entry-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999; display: flex; 
-            justify-content: center; align-items: center;
-            transition: opacity 1.2s ease, visibility 1.2s;
-            overflow: hidden;
+            z-index: 9999; display: flex; flex-direction: column;
+            align-items: center; transition: opacity 1.2s ease, visibility 1.2s;
         }
 
-        /* 背景影片： object-fit 確保不變形 */
+        /* 影院級背景影片 */
         .bg-video {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; z-index: -1; opacity: 0.6;
+            object-fit: cover; z-index: -2; opacity: 0.7;
         }
 
-        .entry-content {
-            display: flex; flex-direction: column; align-items: center; 
-            gap: 40px; text-align: center; z-index: 10;
+        /* 暗角遮罩：增加電影氛圍感，讓中心發光 */
+        #entry-overlay::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.8) 100%);
+            z-index: -1; pointer-events: none;
         }
 
-        /* 大頭照發光特效：修正圖片沒出現的問題 */
-        .profile-img-container {
+        /* ============================================
+           2. LOGO 定位與特效 (中上部)
+           ============================================ */
+        .logo-wrapper {
+            position: absolute;
+            top: 15%; /* 定位在畫面上方 15% 處 */
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .logo-portal {
             width: 180px; height: 180px; border-radius: 50%;
-            border: 3px solid #007bff;
-            box-shadow: 0 0 30px rgba(0, 123, 255, 0.8);
-            overflow: hidden; background: #111; /* 沒圖時的底色 */
-            animation: imgFloat 4s ease-in-out infinite;
+            border: 2px solid rgba(0, 123, 255, 0.8);
+            background: rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 40px rgba(0, 123, 255, 0.6), inset 0 0 20px rgba(0, 123, 255, 0.4);
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden; animation: portalFloat 4s ease-in-out infinite;
         }
 
-        .profile-img-container img {
-            width: 100%; height: 100%; object-fit: cover;
+        .logo-portal img {
+            width: 100%; height: 100%; object-fit: contain;
+            /* 🔥 關鍵：濾掉圖片黑底 */
+            mix-blend-mode: screen; 
+            filter: drop-shadow(0 0 10px rgba(0, 123, 255, 0.8));
         }
 
-        @keyframes imgFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+        @keyframes portalFloat {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.02); }
         }
 
+        /* ============================================
+           3. 進入按鈕 (紅框位置 - 底部)
+           ============================================ */
         .entry-btn {
-            padding: 18px 60px; font-family: 'Noto Serif TC', serif; font-size: 1.4rem;
-            color: #fff; background: rgba(0,0,0,0.4); border: 2px solid #007bff;
-            border-radius: 50px; cursor: pointer; letter-spacing: 10px;
-            box-shadow: 0 0 20px rgba(0, 123, 255, 0.5); transition: 0.4s;
-            backdrop-filter: blur(5px);
+            position: absolute;
+            bottom: 10%; /* 定位到畫面紅框底部 */
+            padding: 16px 60px;
+            background: rgba(10, 10, 20, 0.6);
+            border: 2px solid #007bff;
+            border-radius: 50px;
+            color: #fff;
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.4rem;
+            letter-spacing: 12px; /* 增加字距，更有電影感 */
+            text-indent: 12px; /* 修正字距造成的偏心 */
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(0, 123, 255, 0.4);
+            transition: 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            backdrop-filter: blur(10px);
+            white-space: nowrap;
         }
 
         .entry-btn:hover {
-            transform: scale(1.1); background: #007bff;
-            box-shadow: 0 0 50px rgba(0, 123, 255, 1);
+            background: #007bff;
+            box-shadow: 0 0 50px rgba(0, 123, 255, 0.8);
+            transform: scale(1.05); letter-spacing: 15px;
         }
 
         #entry-overlay.fade-out { opacity: 0; visibility: hidden; }
 
         /* ============================================
-           2. 核心內容樣式 (維持你的專業風格)
+           4. 後續內容 (隱藏在遮罩後)
            ============================================ */
-        body, html { 
-            margin: 0; padding: 0; background: #000; color: #fff; 
-            scroll-behavior: smooth; font-family: 'Oswald', sans-serif; 
-            overflow-x: hidden; width: 100%;
+        main {
+            width: 100%; height: 100vh; background: #000;
+            display: flex; justify-content: center; align-items: center;
+            text-align: center;
         }
+        .reveal-logo { font-size: 4rem; letter-spacing: 10px; opacity: 0; transform: translateY(20px); transition: 1s; }
+        .reveal-logo.active { opacity: 1; transform: translateY(0); }
 
-        /* 導航選單：電腦與手機通用 */
-        .drawer-menu {
-            position: fixed; left: 0; top: 0; width: 0px; height: 100vh;
-            overflow: hidden; transition: width 0.6s cubic-bezier(0.19, 1, 0.22, 1);
-            z-index: 2000; display: flex; flex-direction: column; justify-content: center;
-            backdrop-filter: blur(15px);
-            background: linear-gradient(120deg, rgba(15,15,15,0.95), rgba(0,0,0,0.98));
-            box-shadow: 5px 0 20px rgba(0,0,0,0.5);
-        }
-
-        .drawer-menu.active { width: 300px; }
-        @media (max-width: 768px) { .drawer-menu.active { width: 85vw; } }
-
-        .drawer-menu a {
-            color: #fff; text-decoration: none; font-family: 'Noto Serif TC', serif;
-            font-size: 1.8rem; margin: 20px auto; opacity: 0; transform: translateX(-20px);
-            transition: 0.4s; text-align: center; width: 100%;
-        }
-        .drawer-menu.active a { opacity: 1; transform: translateX(0); }
-        .sub-text { font-size: 0.9rem; color: #666; display: block; }
-
-        .menu-btn {
-            position: fixed; top: 25px; left: 25px; z-index: 3000;
-            width: 35px; height: 25px; cursor: pointer; display: flex;
-            flex-direction: column; justify-content: space-between;
-        }
-        .menu-btn div { width: 100%; height: 3px; background: #fff; transition: 0.3s; }
-
-        /* 卡片設計 */
-        section { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px 20px; }
-        .logo { font-size: 5rem; letter-spacing: 15px; font-family: 'Noto Serif TC', serif; }
-        
-        .grid { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
-        .item { 
-            width: 280px; height: 400px; background: #111; border: 1px solid #333;
-            display: flex; flex-direction: column; justify-content: flex-end; padding: 30px;
-            transition: 0.5s; cursor: pointer; position: relative; overflow: hidden;
-        }
-        .item:hover { transform: translateY(-10px); border-color: #007bff; }
-        
-        /* 動畫 */
-        .reveal { opacity: 0; transform: translateY(30px); transition: 1s; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-
+        /* 手機版適配 */
         @media (max-width: 768px) {
-            .logo { font-size: 2.5rem !important; letter-spacing: 5px; }
-            .item { width: 90% !important; height: 200px !important; }
+            .logo-portal { width: 140px; height: 140px; }
+            .entry-btn { font-size: 1.1rem; padding: 12px 40px; letter-spacing: 6px; bottom: 12%; }
         }
     </style>
 </head>
 <body>
 
-   <div id="entry-overlay">
-    <video autoplay muted loop playsinline class="bg-video">
-        <source src="bg.mp4" type="video/mp4">
-    </video>
-    
-    <div class="entry-content">
-        <div class="profile-img-container">
-            <img src="my-photo.jpg" alt="ActionBro">
+    <div id="entry-overlay">
+        <video autoplay muted loop playsinline class="bg-video">
+            <source src="bg.mp4" type="video/mp4">
+        </video>
+        
+        <div class="logo-wrapper">
+            <div class="logo-portal">
+                <img src="my-photo.png" alt="ActionBro Logo">
+            </div>
         </div>
+        
         <button class="entry-btn" onclick="startExperience()">進入影視元宇宙</button>
     </div>
-</div>
 
-    <div class="menu-btn" onclick="toggleMenu()">
-        <div></div><div></div><div></div>
-    </div>
-
-    <div class="drawer-menu" id="drawer">
-        <a href="#hero" onclick="closeMenu()">HOME<br><span class="sub-text">首頁</span></a>
-        <a href="#library" onclick="closeMenu()">LIBRARY<br><span class="sub-text">剪輯圖書室</span></a>
-        <a href="#services" onclick="closeMenu()">SERVICES<br><span class="sub-text">客製化服務</span></a>
-    </div>
-
-    <section id="hero">
-        <h1 class="logo reveal">影視元宇宙</h1>
-        <p class="reveal" style="color: #888; letter-spacing: 5px;">SCROLL TO ENTER</p>
-    </section>
-
-    <section id="library">
-        <h2 class="reveal" style="font-size: 3rem; margin-bottom: 50px;">剪輯圖書館</h2>
-        <div class="grid reveal">
-            <div class="item" onclick="location.href='library.html'"><h3>PR 教學</h3><p>VIEW LIBRARY</p></div>
-            <div class="item" onclick="location.href='library.html'"><h3>達芬奇調色</h3><p>VIEW LIBRARY</p></div>
-            <div class="item" onclick="location.href='library.html'"><h3>剪映快剪</h3><p>VIEW LIBRARY</p></div>
-        </div>
-    </section>
+    <main id="main-content">
+        <h1 id="inner-logo" class="reveal-logo">影視元宇宙</h1>
+    </main>
 
     <script>
         function startExperience() {
-            document.getElementById('entry-overlay').classList.add('fade-out');
-        }
-        function toggleMenu() {
-            document.getElementById('drawer').classList.toggle('active');
-        }
-        function closeMenu() {
-            document.getElementById('drawer').classList.remove('active');
+            // 1. 遮罩淡出
+            const overlay = document.getElementById('entry-overlay');
+            overlay.classList.add('fade-out');
+            
+            // 2. 觸發內部內容動畫
+            setTimeout(() => {
+                document.getElementById('inner-logo').classList.add('active');
+            }, 800);
         }
 
-        // Scroll Reveal 邏輯
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                }
-            });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        // 確保按鈕在點擊時有觸感回饋
+        document.querySelector('.entry-btn').addEventListener('touchstart', function(){
+            this.style.transform = 'scale(0.95)';
+        });
+        document.querySelector('.entry-btn').addEventListener('touchend', function(){
+            this.style.transform = 'scale(1)';
+        });
     </script>
 </body>
 </html>
